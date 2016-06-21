@@ -68,7 +68,7 @@ func main() {
 ```
 
 
-# Example - Send to list of Devices (tokens)
+# Example - Send to a list of Devices (tokens)
 
 ```golang
 
