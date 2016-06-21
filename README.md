@@ -10,10 +10,12 @@ This library uses HTTP/JSON Firebase Cloud Messaging connection server protocol
 * send messages to a device list
 * message can be a notification or data payload
 
-- in progress
+
+
+---- in progress
 * retry
 * instance id features
- 
+
 
 
 # Usage
