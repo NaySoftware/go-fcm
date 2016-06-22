@@ -4,7 +4,7 @@ Firebase Cloud Messaging ( FCM ) Library using golang ( Go )
 This library uses HTTP/JSON Firebase Cloud Messaging connection server protocol
 
 
-- features
+###### features
 
 * send messages to a topic
 * send messages to a device list
@@ -12,23 +12,32 @@ This library uses HTTP/JSON Firebase Cloud Messaging connection server protocol
 
 
 
----- in progress
+###### in progress
 * retry
 * instance id features
 
 
 
-# Usage
+## Usage
+
+
 
 ```
 go get github.com/NaySoftware/go-fcm
 
 ```
 
+### Notes
 
 
+serverKey is the server key by Firebase Cloud Messaging
+to get the key go to :
+Firebase project settings --> Cloud Messaging --> then copy the server key
 
-# Example - Send to A topic
+
+# Examples
+
+### Send to A topic
 
 ```golang
 
@@ -40,7 +49,7 @@ import (
 )
 
 const (
-	 key = "YOUR-KEY"
+	 serverKey = "YOUR-KEY"
    topic = "/topics/someTopic"
 )
 
@@ -51,7 +60,7 @@ func main() {
 		"sum": "Happy Day",
 	}
 
-	c := fcm.NewFcmClient(key)
+	c := fcm.NewFcmClient(serverKey)
 	c.NewFcmMsgTo(topic, data)
 
 	status, err := c.Send(1)
@@ -68,7 +77,7 @@ func main() {
 ```
 
 
-# Example - Send to a list of Devices (tokens)
+### Send to a list of Devices (tokens)
 
 ```golang
 
@@ -80,7 +89,7 @@ import (
 )
 
 const (
-	 key = "YOUR-KEY"
+	 serverKey = "YOUR-KEY"
 )
 
 func main() {
@@ -101,7 +110,7 @@ func main() {
       "token7",
   }
 
-	c := fcm.NewFcmClient(key)
+	c := fcm.NewFcmClient(serverKey)
   c.NewFcmRegIdsMsg(ids, data)
   c.AppendDevices(xds)
 
