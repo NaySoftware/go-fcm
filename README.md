@@ -31,8 +31,12 @@ go get github.com/NaySoftware/go-fcm
 
 
 serverKey is the server key by Firebase Cloud Messaging
-to get the key go to :
-Firebase project settings --> Cloud Messaging --> then copy the server key
+
+Server Key can be found in:
+
+1. go to Firebase project settings
+2. Cloud Messaging
+3. then copy the server key
 
 
 # Examples
