@@ -34,7 +34,7 @@ serverKey is the server key by Firebase Cloud Messaging
 
 Server Key can be found in:
 
-1. go to Firebase project settings
+1. Firebase project settings
 2. Cloud Messaging
 3. then copy the server key
 
