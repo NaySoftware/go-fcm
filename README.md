@@ -1,6 +1,7 @@
 # go-fcm
-[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=MYW4MY786JXFN&lc=GB&item_name=go%2dfcm%20development&item_number=go%2dfcm&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donate_SM%2egif%3aNonHosted)
 
+[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg?style=flat-square)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=MYW4MY786JXFN&lc=GB&item_name=go%2dfcm%20development&item_number=go%2dfcm&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donate_SM%2egif%3aNonHosted)
+[![AUR](https://img.shields.io/aur/license/yaourt.svg?maxAge=2592000?style=flat-square)]()
 
 Firebase Cloud Messaging ( FCM ) Library using golang ( Go )
 
@@ -12,7 +13,7 @@ This library uses HTTP/JSON Firebase Cloud Messaging connection server protocol
 * send messages to a topic
 * send messages to a device list
 * message can be a notification or data payload
-
+* supports notification condition	
 
 
 ###### in progress
@@ -72,7 +73,9 @@ func main() {
 	c := fcm.NewFcmClient(serverKey)
 	c.NewFcmMsgTo(topic, data)
 
-	status, err := c.Send(1)
+
+	status, err := c.Send(1)  // send once - no retry
+	// [retries n > 1]
 
 	if err == nil {
     status.PrintResults()
@@ -123,7 +126,8 @@ func main() {
   c.NewFcmRegIdsMsg(ids, data)
   c.AppendDevices(xds)
 
-	status, err := c.Send(1)
+	status, err := c.Send(1) // send once - no retry
+	// [retries n > 1]
 
 	if err == nil {
     status.PrintResults()
