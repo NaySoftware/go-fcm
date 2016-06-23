@@ -388,3 +388,8 @@ func setMinBackoff(m time.Duration) {
 func setMaxBackoff(m time.Duration) {
 	maxBackoff = m
 }
+
+func (this *FcmClient) SetCondition(condition string) *FcmClient {
+	this.Message.Condition = condition
+	return this
+}
