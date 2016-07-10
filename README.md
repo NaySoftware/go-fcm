@@ -28,7 +28,7 @@ This library uses HTTP/JSON Firebase Cloud Messaging connection server protocol
 go get github.com/NaySoftware/go-fcm
 ```
 
-## Docs - go-fcm API 
+## Docs - go-fcm API
 ```
 https://godoc.org/github.com/NaySoftware/go-fcm
 ```
@@ -38,7 +38,7 @@ https://godoc.org/github.com/NaySoftware/go-fcm
 https://firebase.google.com/docs/cloud-messaging/http-server-ref
 ```
 
-###### Firebase Cloud Messaging Developer docs
+#### Firebase Cloud Messaging Developer docs
 ```
 https://firebase.google.com/docs/cloud-messaging/
 ```
