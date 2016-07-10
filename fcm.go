@@ -3,14 +3,11 @@ package fcm
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	// "strings"
-	"github.com/jpillora/backoff"
-	// "strconv"
 	"time"
+	// "github.com/jpillora/backoff"
 )
 
 const (
@@ -23,8 +20,8 @@ const (
 )
 
 var (
-	minBackoff       = 1 * time.Second
-	maxBackoff       = 10 * time.Second
+	// minBackoff       = 1 * time.Second
+	// maxBackoff       = 10 * time.Second
 	retreyableErrors = map[string]bool{
 		"Unavailable":         true,
 		"InternalServerError": true,
@@ -81,6 +78,24 @@ type NotificationPayload struct {
 	TitleLocKey  string `json:"title_loc_key,omitempty"`
 	TitleLocArgs string `json:"title_loc_args,omitempty"`
 }
+
+type InstanceIdResult struct {
+	Application        string                         `json:"application,omitempty"`
+	AuthorizedEntity   string                         `json:"authorizedEntity,omitempty"`
+	ApplicationVersion string                         `json:"applicationVersion,omitempty"`
+	AppSigner          string                         `json:"appSigner,omitempty"`
+	AttestStatus       string                         `json:"attestStatus,omitempty"`
+	Platform           string                         `json:"platform,omitempty"`
+	connectionType     string                         `json:"connectionType,omitempty"`
+	connectDate        string                         `json:"connectDate,omitempty"`
+	rel                map[string]InstanceIdRelTopics `json:"rel,omitempty"`
+}
+
+type InstanceIdRelTopics struct {
+	TopicName map[string]TopicDate
+}
+
+type TopicDate map[string]string
 
 func NewFcmClient(apiKey string) *FcmClient {
 	fcmc := new(FcmClient)
@@ -148,8 +163,6 @@ func (this *FcmClient) sendOnce() (*FcmResponseStatus, error) {
 		return fcmRespStatus, err
 	}
 
-	// fmt.Println(string(jsonByte))
-
 	request, err := http.NewRequest("POST", fcmServerUrl, bytes.NewBuffer(jsonByte))
 	request.Header.Set("Authorization", this.apiKeyHeader())
 	request.Header.Set("Content-Type", "application/json")
@@ -173,7 +186,6 @@ func (this *FcmClient) sendOnce() (*FcmResponseStatus, error) {
 
 		fcmRespStatus.Ok = true
 
-		// fmt.Println(response.Status)
 		eror := fcmRespStatus.parseStatusBody(body)
 		if eror != nil {
 			return fcmRespStatus, eror
@@ -196,63 +208,8 @@ func (this *FcmClient) sendOnce() (*FcmResponseStatus, error) {
 
 }
 
-func (this *FcmClient) retrySend(retries int) (*FcmResponseStatus, error) {
-
-	if retries < 0 {
-		return nil, errors.New("Retries is a Positive integer")
-	}
-
-	backOffHand := newBackoffHandler()
-
-	fcmResp := new(FcmResponseStatus)
-
-	for i := 0; i < retries; i++ {
-		fcmResp, err := this.sendOnce()
-		// fmt.Println("===========v=debug=v===============")
-		// fcmResp.PrintResults()
-		//     fmt.Println("===========^=debug=^===============")
-		//
-
-		if err != nil {
-			fmt.Println("error not nil")
-
-			break
-
-		} else if fcmResp.isTimeout() {
-			// retry
-
-			fmt.Println("TimeOut")
-
-			// get retry after header
-			// if not found
-			// get a backoff time
-			// -- sleep
-			if sleepTime, err := time.ParseDuration(fcmResp.RetryAfter); err != nil && sleepTime > 0 {
-				time.Sleep(sleepTime)
-			} else {
-				time.Sleep(backOffHand.Duration())
-			}
-
-			// regenerate "TO" for the faild requestes
-
-			// resend
-			// next loop
-		} else {
-
-			fcmResp.Ok = true
-			return fcmResp, nil
-		}
-
-	}
-
-	fcmResp.Ok = false
-
-	return fcmResp, errors.New("Can't Send Messages")
-
-}
-
-func (this *FcmClient) Send(retries int) (*FcmResponseStatus, error) {
-	return this.retrySend(retries)
+func (this *FcmClient) Send() (*FcmResponseStatus, error) {
+	return this.sendOnce()
 
 }
 func (this *FcmMsg) toJsonByte() ([]byte, error) {
@@ -349,7 +306,7 @@ func (this *FcmResponseStatus) PrintResults() {
 	}
 }
 
-func (this *FcmResponseStatus) isTimeout() bool {
+func (this *FcmResponseStatus) IsTimeout() bool {
 	if this.StatusCode > 500 {
 		return true
 	} else if this.StatusCode == 200 {
@@ -365,31 +322,33 @@ func (this *FcmResponseStatus) isTimeout() bool {
 	return false
 }
 
-func getRetryAfterInt(resp *http.Response) (t time.Duration, e error) {
-	t, e = time.ParseDuration(resp.Header.Get(retry_after_header))
+
+func (this *FcmResponseStatus) GetRetryAfterTime() (t time.Duration, e error) {
+	t, e = time.ParseDuration(this.RetryAfter)
 	return
 }
 
-func newBackoffHandler() *backoff.Backoff {
-	b := &backoff.Backoff{
-
-		Min:    minBackoff,
-		Max:    maxBackoff,
-		Jitter: true,
-	}
-
-	return b
-}
-
-func setMinBackoff(m time.Duration) {
-	minBackoff = m
-}
-
-func setMaxBackoff(m time.Duration) {
-	maxBackoff = m
-}
 
 func (this *FcmClient) SetCondition(condition string) *FcmClient {
 	this.Message.Condition = condition
 	return this
 }
+
+// func newBackoffHandler() *backoff.Backoff {
+// 	b := &backoff.Backoff{
+//
+// 		Min:    minBackoff,
+// 		Max:    maxBackoff,
+// 		Jitter: true,
+// 	}
+//
+// 	return b
+// }
+
+// func setMinBackoff(m time.Duration) {
+// 	minBackoff = m
+// }
+//
+// func setMaxBackoff(m time.Duration) {
+// 	maxBackoff = m
+// }
