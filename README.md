@@ -56,7 +56,7 @@ its recommended to use a backoff time to retry the request - (if RetryAfter
 
 ### Send to A topic
 
-```golang
+```go
 
 package main
 
@@ -98,7 +98,7 @@ func main() {
 
 ### Send to a list of Devices (tokens)
 
-```golang
+```go
 
 package main
 
