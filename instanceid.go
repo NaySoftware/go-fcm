@@ -11,23 +11,37 @@ import (
 )
 
 const (
+  // instance_id_info_with_details_srv_url
 	instance_id_info_with_details_srv_url = "https://iid.googleapis.com/iid/info/%s?details=true"
+
+  // instance_id_info_no_details_srv_url
 	instance_id_info_no_details_srv_url   = "https://iid.googleapis.com/iid/info/%s"
+
+  // subscribe_instanceid_to_topic_srv_url
 	subscribe_instanceid_to_topic_srv_url = "https://iid.googleapis.com/iid/v1/%s/rel/topics/%s"
 
+  // batch_add_srv_url
 	batch_add_srv_url = "https://iid.googleapis.com/iid/v1:batchAdd"
+
+  // batch_rem_srv_url
 	batch_rem_srv_url = "https://iid.googleapis.com/iid/v1:batchRemove"
 
+  // apns_batch_import_srv_url
 	apns_batch_import_srv_url = "https://iid.googleapis.com/iid/v1:batchImport"
 
+  // apns_token_key
 	apns_token_key = "apns_token"
+  // status_key
 	status_key     = "status"
+  // reg_token_key
 	reg_token_key  = "registration_token"
 
+  // topics
 	topics = "/topics/"
 )
 
 var (
+  // batchErrors response errors
 	batchErrors = map[string]bool{
 		"NOT_FOUND":        true,
 		"INVALID_ARGUMENT": true,
@@ -36,6 +50,7 @@ var (
 	}
 )
 
+// InstanceIdInfoResponse response for instance id info request
 type InstanceIdInfoResponse struct {
 	Application        string                                  `json:"application,omitempty"`
 	AuthorizedEntity   string                                  `json:"authorizedEntity,omitempty"`
@@ -49,17 +64,21 @@ type InstanceIdInfoResponse struct {
 	Rel                map[string]map[string]map[string]string `json:"rel,omitempty"`
 }
 
+// SubscribeResponse response for single topic subscribtion
 type SubscribeResponse struct {
 	Error      string `json:"error,omitempty"`
 	Status     string
 	StatusCode int
 }
 
+
+// BatchRequest add/remove request
 type BatchRequest struct {
 	To        string   `json:"to,omitempty"`
 	RegTokens []string `json:"registration_tokens,omitempty"`
 }
 
+// BatchResponse add/remove response
 type BatchResponse struct {
 	Error      string              `json:"error,omitempty"`
 	Results    []map[string]string `json:"results,omitempty"`
@@ -67,12 +86,16 @@ type BatchResponse struct {
 	StatusCode int
 }
 
+
+// ApnsBatchRequest apns import request
 type ApnsBatchRequest struct {
 	App        string   `json:"application,omitempty"`
 	Sandbox    bool     `json:"sandbox,omitempty"`
 	ApnsTokens []string `json:"apns_tokens,omitempty"`
 }
 
+
+// ApnsBatchResponse apns import response
 type ApnsBatchResponse struct {
 	Results    []map[string]string `json:"results,omitempty"`
 	Error      string              `json:"error,omitempty"`
@@ -80,6 +103,8 @@ type ApnsBatchResponse struct {
 	StatusCode int
 }
 
+
+// GetInfo gets the instance id info
 func (this *FcmClient) GetInfo(withDetails bool, instanceIdToken string) (*InstanceIdInfoResponse, error) {
 
 	var request_url string = generateGetInfoUrl(instance_id_info_no_details_srv_url, instanceIdToken)
@@ -117,6 +142,7 @@ func (this *FcmClient) GetInfo(withDetails bool, instanceIdToken string) (*Insta
 	return infoResponse, nil
 }
 
+// parseGetInfo parses response to InstanceIdInfoResponse
 func parseGetInfo(body []byte) (*InstanceIdInfoResponse, error) {
 
 	info := new(InstanceIdInfoResponse)
@@ -129,6 +155,7 @@ func parseGetInfo(body []byte) (*InstanceIdInfoResponse, error) {
 
 }
 
+// PrintResults prints InstanceIdInfoResponse, for faster debugging
 func (this *InstanceIdInfoResponse) PrintResults() {
 	fmt.Println("Error     : ", this.Error)
 	fmt.Println("App       : ", this.Application)
@@ -149,10 +176,12 @@ func (this *InstanceIdInfoResponse) PrintResults() {
 	}
 }
 
+// generateGetInfoUrl generate based on with details and the instance token
 func generateGetInfoUrl(srv string, instanceIdToken string) string {
 	return fmt.Sprintf(srv, instanceIdToken)
 }
 
+// SubscribeToTopic subscribes a single device/token to a topic
 func (this *FcmClient) SubscribeToTopic(instanceIdToken string, topic string) (*SubscribeResponse, error) {
 
 	request, err := http.NewRequest("POST", generateSubToTopicUrl(instanceIdToken, topic), nil)
@@ -184,6 +213,7 @@ func (this *FcmClient) SubscribeToTopic(instanceIdToken string, topic string) (*
 	return subResponse, nil
 }
 
+// parseSubscribeResponse converts a byte response to a SubscribeResponse
 func parseSubscribeResponse(body []byte, resp *http.Response) (*SubscribeResponse, error) {
 
 	subResp := new(SubscribeResponse)
@@ -197,6 +227,7 @@ func parseSubscribeResponse(body []byte, resp *http.Response) (*SubscribeRespons
 	return subResp, nil
 }
 
+// PrintResults prints SubscribeResponse, for faster debugging
 func (this *SubscribeResponse) PrintResults() {
 
 	fmt.Println("Response Status: ", this.Status)
@@ -207,6 +238,7 @@ func (this *SubscribeResponse) PrintResults() {
 
 }
 
+// generateSubToTopicUrl generates a url based on the instnace id and topic name
 func generateSubToTopicUrl(instaceId string, topic string) string {
 	Tmptopic := strings.ToLower(topic)
 	if strings.Contains(Tmptopic, "/topics/") {
@@ -216,6 +248,7 @@ func generateSubToTopicUrl(instaceId string, topic string) string {
 	return fmt.Sprintf(subscribe_instanceid_to_topic_srv_url, instaceId, topic)
 }
 
+// BatchSubscribeToTopic subscribes (many) devices/tokens to a given topic
 func (this *FcmClient) BatchSubscribeToTopic(tokens []string, topic string) (*BatchResponse, error) {
 
 	jsonByte, err := generateBatchRequest(tokens, topic)
@@ -256,6 +289,7 @@ func (this *FcmClient) BatchSubscribeToTopic(tokens []string, topic string) (*Ba
 	return result, nil
 }
 
+// BatchUnsubscribeFromTopic unsubscribes (many) devices/tokens from a given topic
 func (this *FcmClient) BatchUnsubscribeFromTopic(tokens []string, topic string) (*BatchResponse, error) {
 
 	jsonByte, err := generateBatchRequest(tokens, topic)
@@ -297,6 +331,7 @@ func (this *FcmClient) BatchUnsubscribeFromTopic(tokens []string, topic string) 
 	return result, nil
 }
 
+// PrintResults prints BatchResponse, for faster debugging
 func (this *BatchResponse) PrintResults() {
 	fmt.Println("Error       : ", this.Error)
 	fmt.Println("Status      : ", this.Status)
@@ -308,6 +343,7 @@ func (this *BatchResponse) PrintResults() {
 	}
 }
 
+// generateBatchRequest based on tokens and topic
 func generateBatchRequest(tokens []string, topic string) ([]byte, error) {
 	envelope := new(BatchRequest)
 	envelope.To = topics + extractTopicName(topic)
@@ -318,6 +354,7 @@ func generateBatchRequest(tokens []string, topic string) ([]byte, error) {
 
 }
 
+// extractTopicName extract topic name for valid topic name input
 func extractTopicName(inTopic string) (result string) {
 	Tmptopic := strings.ToLower(inTopic)
 	if strings.Contains(Tmptopic, "/topics/") {
@@ -330,6 +367,7 @@ func extractTopicName(inTopic string) (result string) {
 	return
 }
 
+// generateBatchResponse converts a byte response to BatchResponse
 func generateBatchResponse(resp []byte) (*BatchResponse, error) {
 	result := new(BatchResponse)
 
@@ -341,6 +379,7 @@ func generateBatchResponse(resp []byte) (*BatchResponse, error) {
 
 }
 
+// ApnsBatchImportRequest apns import requst
 func (this *FcmClient) ApnsBatchImportRequest(apnsReq *ApnsBatchRequest) (*ApnsBatchResponse, error) {
 
 	jsonByte, err := apnsReq.ToByte()
@@ -384,6 +423,7 @@ func (this *FcmClient) ApnsBatchImportRequest(apnsReq *ApnsBatchRequest) (*ApnsB
 	return result, nil
 }
 
+// ToByte converts ApnsBatchRequest to a byte
 func (this *ApnsBatchRequest) ToByte() ([]byte, error) {
 	data, err := json.Marshal(this)
 	if err != nil {
@@ -393,6 +433,7 @@ func (this *ApnsBatchRequest) ToByte() ([]byte, error) {
 	return data, nil
 }
 
+// parseApnsBatchResponse converts apns byte response to ApnsBatchResponse
 func parseApnsBatchResponse(resp []byte) (*ApnsBatchResponse, error) {
 
 	result := new(ApnsBatchResponse)
@@ -404,6 +445,7 @@ func parseApnsBatchResponse(resp []byte) (*ApnsBatchResponse, error) {
 
 }
 
+// PrintResults prints ApnsBatchResponse, for faster debugging
 func (this *ApnsBatchResponse) PrintResults() {
 	fmt.Println("Status     : ", this.Status)
 	fmt.Println("StatusCode : ", this.StatusCode)

@@ -7,35 +7,41 @@ import (
 	"io/ioutil"
 	"net/http"
 	"time"
-	// "github.com/jpillora/backoff"
 )
 
 const (
+	// fcm_server_url fcm server url
 	fcm_server_url     = "https://fcm.googleapis.com/fcm/send"
+	// MAX_TTL the default ttl for a notification
 	MAX_TTL            = 2419200
+	// Priority_HIGH notification priority
 	Priority_HIGH      = "high"
+	// Priority_NORMAL notification priority
 	Priority_NORMAL    = "normal"
+	// retry_after_header header name
 	retry_after_header = "Retry-After"
+	// error_key readable error caching !
 	error_key          = "error"
 )
 
 var (
-	// minBackoff       = 1 * time.Second
-	// maxBackoff       = 10 * time.Second
+	// retreyableErrors whether the error is a retryable
 	retreyableErrors = map[string]bool{
 		"Unavailable":         true,
 		"InternalServerError": true,
 	}
 
-	// for testing purposes
+	// fcmServerUrl for testing purposes
 	fcmServerUrl = fcm_server_url
 )
 
+// FcmClient stores the key and the Message (FcmMsg)
 type FcmClient struct {
 	ApiKey  string
 	Message FcmMsg
 }
 
+// FcmMsg represents fcm request message
 type FcmMsg struct {
 	Data                  map[string]string   `json:"data,omitempty"`
 	To                    string              `json:"to,omitempty"`
@@ -51,6 +57,7 @@ type FcmMsg struct {
 	Condition             string              `json:"condition,omitempty"`
 }
 
+// FcmMsg represents fcm response message - (tokens and topics)
 type FcmResponseStatus struct {
 	Ok            bool
 	StatusCode    int
@@ -64,6 +71,7 @@ type FcmResponseStatus struct {
 	RetryAfter    string
 }
 
+// NotificationPayload notification message payload
 type NotificationPayload struct {
 	Title        string `json:"title,omitempty"`
 	Body         string `json:"body,omitempty"`
@@ -79,24 +87,8 @@ type NotificationPayload struct {
 	TitleLocArgs string `json:"title_loc_args,omitempty"`
 }
 
-type InstanceIdResult struct {
-	Application        string                         `json:"application,omitempty"`
-	AuthorizedEntity   string                         `json:"authorizedEntity,omitempty"`
-	ApplicationVersion string                         `json:"applicationVersion,omitempty"`
-	AppSigner          string                         `json:"appSigner,omitempty"`
-	AttestStatus       string                         `json:"attestStatus,omitempty"`
-	Platform           string                         `json:"platform,omitempty"`
-	connectionType     string                         `json:"connectionType,omitempty"`
-	connectDate        string                         `json:"connectDate,omitempty"`
-	rel                map[string]InstanceIdRelTopics `json:"rel,omitempty"`
-}
 
-type InstanceIdRelTopics struct {
-	TopicName map[string]TopicDate
-}
-
-type TopicDate map[string]string
-
+// NewFcmClient init and create fcm client
 func NewFcmClient(apiKey string) *FcmClient {
 	fcmc := new(FcmClient)
 	fcmc.ApiKey = apiKey
@@ -104,6 +96,7 @@ func NewFcmClient(apiKey string) *FcmClient {
 	return fcmc
 }
 
+// NewFcmTopicMsg sets the targeted token/topic and the data payload
 func (this *FcmClient) NewFcmTopicMsg(to string, body map[string]string) *FcmClient {
 
 	this.NewFcmMsgTo(to, body)
@@ -111,6 +104,7 @@ func (this *FcmClient) NewFcmTopicMsg(to string, body map[string]string) *FcmCli
 	return this
 }
 
+// NewFcmMsgTo sets the targeted token/topic and the data payload
 func (this *FcmClient) NewFcmMsgTo(to string, body map[string]string) *FcmClient {
 	this.Message.To = to
 	this.Message.Data = body
@@ -118,6 +112,7 @@ func (this *FcmClient) NewFcmMsgTo(to string, body map[string]string) *FcmClient
 	return this
 }
 
+// SetMsgData sets data payload
 func (this *FcmClient) SetMsgData(body map[string]string) *FcmClient {
 
 	this.Message.Data = body
@@ -126,6 +121,7 @@ func (this *FcmClient) SetMsgData(body map[string]string) *FcmClient {
 
 }
 
+// NewFcmRegIdsMsg gets a list of devices with data payload
 func (this *FcmClient) NewFcmRegIdsMsg(list []string, body map[string]string) *FcmClient {
 	this.newDevicesList(list)
 	this.Message.Data = body
@@ -134,6 +130,7 @@ func (this *FcmClient) NewFcmRegIdsMsg(list []string, body map[string]string) *F
 
 }
 
+// newDevicesList init the devices list
 func (this *FcmClient) newDevicesList(list []string) *FcmClient {
 	this.Message.RegistrationIds = make([]string, len(list))
 	copy(this.Message.RegistrationIds, list)
@@ -142,6 +139,7 @@ func (this *FcmClient) newDevicesList(list []string) *FcmClient {
 
 }
 
+// AppendDevices adds more devices/tokens to the Fcm request
 func (this *FcmClient) AppendDevices(list []string) *FcmClient {
 
 	this.Message.RegistrationIds = append(this.Message.RegistrationIds, list...)
@@ -149,10 +147,12 @@ func (this *FcmClient) AppendDevices(list []string) *FcmClient {
 	return this
 }
 
+// apiKeyHeader generates the value of the Authorization key
 func (this *FcmClient) apiKeyHeader() string {
 	return fmt.Sprintf("key=%v", this.ApiKey)
 }
 
+// sendOnce send a single request to fcm
 func (this *FcmClient) sendOnce() (*FcmResponseStatus, error) {
 
 	fcmRespStatus := new(FcmResponseStatus)
@@ -208,16 +208,19 @@ func (this *FcmClient) sendOnce() (*FcmResponseStatus, error) {
 
 }
 
+// Send to fcm
 func (this *FcmClient) Send() (*FcmResponseStatus, error) {
 	return this.sendOnce()
 
 }
+
+// toJsonByte converts FcmMsg to a json byte
 func (this *FcmMsg) toJsonByte() ([]byte, error) {
 
 	return json.Marshal(this)
 
 }
-
+// parseStatusBody parse FCM response body
 func (this *FcmResponseStatus) parseStatusBody(body []byte) error {
 
 	if err := json.Unmarshal([]byte(body), &this); err != nil {
@@ -227,6 +230,8 @@ func (this *FcmResponseStatus) parseStatusBody(body []byte) error {
 
 }
 
+// SetPriorety Sets the priority of the message.
+// Priority_HIGH or Priority_NORMAL
 func (this *FcmClient) SetPriorety(p string) {
 
 	if p == Priority_HIGH {
@@ -236,6 +241,11 @@ func (this *FcmClient) SetPriorety(p string) {
 	}
 }
 
+// SetCollapseKey This parameter identifies a group of messages
+// (e.g., with collapse_key: "Updates Available") that can be collapsed,
+// so that only the last message gets sent when delivery can be resumed.
+// This is intended to avoid sending too many of the same messages when the
+// device comes back online or becomes active (see delay_while_idle).
 func (this *FcmClient) SetCollapseKey(val string) *FcmClient {
 
 	this.Message.CollapseKey = val
@@ -243,6 +253,8 @@ func (this *FcmClient) SetCollapseKey(val string) *FcmClient {
 	return this
 }
 
+// SetNotificationPayload sets the notification payload based on the specs
+// https://firebase.google.com/docs/cloud-messaging/http-server-ref
 func (this *FcmClient) SetNotificationPayload(payload *NotificationPayload) *FcmClient {
 
 	this.Message.Notification = *payload
@@ -250,6 +262,10 @@ func (this *FcmClient) SetNotificationPayload(payload *NotificationPayload) *Fcm
 	return this
 }
 
+// SetContentAvailable On iOS, use this field to represent content-available
+// in the APNS payload. When a notification or message is sent and this is set
+// to true, an inactive client app is awoken. On Android, data messages wake
+// the app by default. On Chrome, currently not supported.
 func (this *FcmClient) SetContentAvailable(isContentAvailable bool) *FcmClient {
 
 	this.Message.ContentAvailable = isContentAvailable
@@ -257,12 +273,21 @@ func (this *FcmClient) SetContentAvailable(isContentAvailable bool) *FcmClient {
 	return this
 }
 
+// SetDelayWhileIdle When this parameter is set to true, it indicates that
+// the message should not be sent until the device becomes active.
+// The default value is false.
 func (this *FcmClient) SetDelayWhileIdle(isDelayWhileIdle bool) *FcmClient {
 
 	this.Message.DelayWhileIdle = isDelayWhileIdle
 
 	return this
 }
+
+// SetTimeToLive This parameter specifies how long (in seconds) the message
+// should be kept in FCM storage if the device is offline. The maximum time
+// to live supported is 4 weeks, and the default value is 4 weeks.
+// For more information, see
+// https://firebase.google.com/docs/cloud-messaging/concept-options#ttl
 func (this *FcmClient) SetTimeToLive(ttl int) *FcmClient {
 
 	if ttl > MAX_TTL {
@@ -277,6 +302,9 @@ func (this *FcmClient) SetTimeToLive(ttl int) *FcmClient {
 	return this
 }
 
+// SetRestrictedPackageName This parameter specifies the package name of the
+// application where the registration tokens must match in order to
+// receive the message.
 func (this *FcmClient) SetRestrictedPackageName(pkg string) *FcmClient {
 
 	this.Message.RestrictedPackageName = pkg
@@ -284,6 +312,9 @@ func (this *FcmClient) SetRestrictedPackageName(pkg string) *FcmClient {
 	return this
 }
 
+// SetDryRun This parameter, when set to true, allows developers to test
+// a request without actually sending a message.
+// The default value is false
 func (this *FcmClient) SetDryRun(drun bool) *FcmClient {
 
 	this.Message.DryRun = drun
@@ -291,6 +322,7 @@ func (this *FcmClient) SetDryRun(drun bool) *FcmClient {
 	return this
 }
 
+// PrintResults prints the FcmResponseStatus results for fast using and debugging
 func (this *FcmResponseStatus) PrintResults() {
 	fmt.Println("Status Code   :", this.StatusCode)
 	fmt.Println("Success       :", this.Success)
@@ -306,6 +338,8 @@ func (this *FcmResponseStatus) PrintResults() {
 	}
 }
 
+// IsTimeout check whether the response timeout based on http response status
+// code and if any error is retryable
 func (this *FcmResponseStatus) IsTimeout() bool {
 	if this.StatusCode > 500 {
 		return true
@@ -322,33 +356,15 @@ func (this *FcmResponseStatus) IsTimeout() bool {
 	return false
 }
 
-
+// GetRetryAfterTime converts the retrey after response header
+// to a time.Duration
 func (this *FcmResponseStatus) GetRetryAfterTime() (t time.Duration, e error) {
 	t, e = time.ParseDuration(this.RetryAfter)
 	return
 }
 
-
+// SetCondition to set a logical expression of conditions that determine the message target
 func (this *FcmClient) SetCondition(condition string) *FcmClient {
 	this.Message.Condition = condition
 	return this
 }
-
-// func newBackoffHandler() *backoff.Backoff {
-// 	b := &backoff.Backoff{
-//
-// 		Min:    minBackoff,
-// 		Max:    maxBackoff,
-// 		Jitter: true,
-// 	}
-//
-// 	return b
-// }
-
-// func setMinBackoff(m time.Duration) {
-// 	minBackoff = m
-// }
-//
-// func setMaxBackoff(m time.Duration) {
-// 	maxBackoff = m
-// }
