@@ -28,10 +28,21 @@ This library uses HTTP/JSON Firebase Cloud Messaging connection server protocol
 go get github.com/NaySoftware/go-fcm
 ```
 
-## Docs
+## Docs - go-fcm API 
 ```
 https://godoc.org/github.com/NaySoftware/go-fcm
 ```
+
+####  Firebase Cloud Messaging HTTP Protocol Specs
+```
+https://firebase.google.com/docs/cloud-messaging/http-server-ref
+```
+
+###### Firebase Cloud Messaging Developer docs
+```
+https://firebase.google.com/docs/cloud-messaging/
+```
+
 ### Notes
 
 ###### Server Key
@@ -52,6 +63,7 @@ a detailed information based on the Firebase Response, with RetryAfter
 (response header) if available - with a failed request.
 its recommended to use a backoff time to retry the request - (if RetryAfter
 	header is not available).
+
 
 
 
