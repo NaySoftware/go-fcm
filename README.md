@@ -81,12 +81,12 @@ package main
 
 import (
 	"fmt"
-    "github.com/NaySoftware/go-fcm"
+	"github.com/NaySoftware/go-fcm"
 )
 
 const (
-	 serverKey = "YOUR-KEY"
-     topic = "/topics/someTopic"
+	serverKey = "YOUR-KEY"
+	topic = "/topics/someTopic"
 )
 
 func main() {
@@ -96,15 +96,33 @@ func main() {
 		"sum": "Happy Day",
 	}
 
-	c := fcm.NewFcmClient(serverKey)
-	c.NewFcmMsgTo(topic, data)
+	notificationPayload := fcm.NotificationPayload{
+		Title: "Happy Day - title",
+		Body: "Happy World - body",
+	}
 
+	ids := []string{
+		"token1",
+	}
+
+	xds := []string{
+		"token5",
+		"token6",
+		"token7",
+	}
+
+	c := fcm.NewFcmClient(serverKey)
+	
+	c.SetNotificationPayload(&notificationPayload)
+	c.SetPriorety(fcm.Priority_HIGH)
+	
+	c.NewFcmRegIdsMsg(ids, data)
+	c.AppendDevices(xds)
 
 	status, err := c.Send()
 
-
 	if err == nil {
-    status.PrintResults()
+		status.PrintResults()
 	} else {
 		fmt.Println(err)
 	}
@@ -123,11 +141,11 @@ package main
 
 import (
 	"fmt"
-    "github.com/NaySoftware/go-fcm"
+	"github.com/NaySoftware/go-fcm"
 )
 
 const (
-	 serverKey = "YOUR-KEY"
+	serverKey = "YOUR-KEY"
 )
 
 func main() {
@@ -137,26 +155,33 @@ func main() {
 		"sum": "Happy Day",
 	}
 
-  ids := []string{
-      "token1",
-  }
+	notificationPayload := fcm.NotificationPayload{
+		Title: "Happy Day - title",
+		Body: "Happy World - body",
+	}
 
+	ids := []string{
+		"token1",
+	}
 
-  xds := []string{
-      "token5",
-      "token6",
-      "token7",
-  }
+	xds := []string{
+		"token5",
+		"token6",
+		"token7",
+	}
 
 	c := fcm.NewFcmClient(serverKey)
-    c.NewFcmRegIdsMsg(ids, data)
-    c.AppendDevices(xds)
+	
+	c.SetNotificationPayload(&notificationPayload)
+	c.SetPriorety(fcm.Priority_HIGH)
+	
+	c.NewFcmRegIdsMsg(ids, data)
+	c.AppendDevices(xds)
 
 	status, err := c.Send()
 
-
 	if err == nil {
-    status.PrintResults()
+		status.PrintResults()
 	} else {
 		fmt.Println(err)
 	}
