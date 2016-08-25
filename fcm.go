@@ -11,17 +11,17 @@ import (
 
 const (
 	// fcm_server_url fcm server url
-	fcm_server_url     = "https://fcm.googleapis.com/fcm/send"
+	fcm_server_url = "https://fcm.googleapis.com/fcm/send"
 	// MAX_TTL the default ttl for a notification
-	MAX_TTL            = 2419200
+	MAX_TTL = 2419200
 	// Priority_HIGH notification priority
-	Priority_HIGH      = "high"
+	Priority_HIGH = "high"
 	// Priority_NORMAL notification priority
-	Priority_NORMAL    = "normal"
+	Priority_NORMAL = "normal"
 	// retry_after_header header name
 	retry_after_header = "Retry-After"
 	// error_key readable error caching !
-	error_key          = "error"
+	error_key = "error"
 )
 
 var (
@@ -43,7 +43,7 @@ type FcmClient struct {
 
 // FcmMsg represents fcm request message
 type FcmMsg struct {
-	Data                  map[string]string   `json:"data,omitempty"`
+	Data                  interface{}         `json:"data,omitempty"`
 	To                    string              `json:"to,omitempty"`
 	RegistrationIds       []string            `json:"registration_ids,omitempty"`
 	CollapseKey           string              `json:"collapse_key,omitempty"`
@@ -87,7 +87,6 @@ type NotificationPayload struct {
 	TitleLocArgs string `json:"title_loc_args,omitempty"`
 }
 
-
 // NewFcmClient init and create fcm client
 func NewFcmClient(apiKey string) *FcmClient {
 	fcmc := new(FcmClient)
@@ -105,7 +104,7 @@ func (this *FcmClient) NewFcmTopicMsg(to string, body map[string]string) *FcmCli
 }
 
 // NewFcmMsgTo sets the targeted token/topic and the data payload
-func (this *FcmClient) NewFcmMsgTo(to string, body map[string]string) *FcmClient {
+func (this *FcmClient) NewFcmMsgTo(to string, body interface{}) *FcmClient {
 	this.Message.To = to
 	this.Message.Data = body
 
@@ -113,7 +112,7 @@ func (this *FcmClient) NewFcmMsgTo(to string, body map[string]string) *FcmClient
 }
 
 // SetMsgData sets data payload
-func (this *FcmClient) SetMsgData(body map[string]string) *FcmClient {
+func (this *FcmClient) SetMsgData(body interface{}) *FcmClient {
 
 	this.Message.Data = body
 
@@ -122,7 +121,7 @@ func (this *FcmClient) SetMsgData(body map[string]string) *FcmClient {
 }
 
 // NewFcmRegIdsMsg gets a list of devices with data payload
-func (this *FcmClient) NewFcmRegIdsMsg(list []string, body map[string]string) *FcmClient {
+func (this *FcmClient) NewFcmRegIdsMsg(list []string, body interface{}) *FcmClient {
 	this.newDevicesList(list)
 	this.Message.Data = body
 
@@ -220,6 +219,7 @@ func (this *FcmMsg) toJsonByte() ([]byte, error) {
 	return json.Marshal(this)
 
 }
+
 // parseStatusBody parse FCM response body
 func (this *FcmResponseStatus) parseStatusBody(body []byte) error {
 
