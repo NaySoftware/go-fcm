@@ -11,37 +11,37 @@ import (
 )
 
 const (
-  // instance_id_info_with_details_srv_url
+	// instance_id_info_with_details_srv_url
 	instance_id_info_with_details_srv_url = "https://iid.googleapis.com/iid/info/%s?details=true"
 
-  // instance_id_info_no_details_srv_url
-	instance_id_info_no_details_srv_url   = "https://iid.googleapis.com/iid/info/%s"
+	// instance_id_info_no_details_srv_url
+	instance_id_info_no_details_srv_url = "https://iid.googleapis.com/iid/info/%s"
 
-  // subscribe_instanceid_to_topic_srv_url
+	// subscribe_instanceid_to_topic_srv_url
 	subscribe_instanceid_to_topic_srv_url = "https://iid.googleapis.com/iid/v1/%s/rel/topics/%s"
 
-  // batch_add_srv_url
+	// batch_add_srv_url
 	batch_add_srv_url = "https://iid.googleapis.com/iid/v1:batchAdd"
 
-  // batch_rem_srv_url
+	// batch_rem_srv_url
 	batch_rem_srv_url = "https://iid.googleapis.com/iid/v1:batchRemove"
 
-  // apns_batch_import_srv_url
+	// apns_batch_import_srv_url
 	apns_batch_import_srv_url = "https://iid.googleapis.com/iid/v1:batchImport"
 
-  // apns_token_key
+	// apns_token_key
 	apns_token_key = "apns_token"
-  // status_key
-	status_key     = "status"
-  // reg_token_key
-	reg_token_key  = "registration_token"
+	// status_key
+	status_key = "status"
+	// reg_token_key
+	reg_token_key = "registration_token"
 
-  // topics
+	// topics
 	topics = "/topics/"
 )
 
 var (
-  // batchErrors response errors
+	// batchErrors response errors
 	batchErrors = map[string]bool{
 		"NOT_FOUND":        true,
 		"INVALID_ARGUMENT": true,
@@ -71,7 +71,6 @@ type SubscribeResponse struct {
 	StatusCode int
 }
 
-
 // BatchRequest add/remove request
 type BatchRequest struct {
 	To        string   `json:"to,omitempty"`
@@ -86,14 +85,12 @@ type BatchResponse struct {
 	StatusCode int
 }
 
-
 // ApnsBatchRequest apns import request
 type ApnsBatchRequest struct {
 	App        string   `json:"application,omitempty"`
 	Sandbox    bool     `json:"sandbox,omitempty"`
 	ApnsTokens []string `json:"apns_tokens,omitempty"`
 }
-
 
 // ApnsBatchResponse apns import response
 type ApnsBatchResponse struct {
@@ -102,7 +99,6 @@ type ApnsBatchResponse struct {
 	Status     string
 	StatusCode int
 }
-
 
 // GetInfo gets the instance id info
 func (this *FcmClient) GetInfo(withDetails bool, instanceIdToken string) (*InstanceIdInfoResponse, error) {
