@@ -158,7 +158,6 @@ func (this *FcmClient) sendOnce() (*FcmResponseStatus, error) {
 
 	jsonByte, err := this.Message.toJsonByte()
 	if err != nil {
-		fcmRespStatus.Ok = false
 		return fcmRespStatus, err
 	}
 
@@ -170,41 +169,30 @@ func (this *FcmClient) sendOnce() (*FcmResponseStatus, error) {
 	response, err := client.Do(request)
 
 	if err != nil {
-		fcmRespStatus.Ok = false
 		return fcmRespStatus, err
 	}
 	defer response.Body.Close()
 
 	body, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return fcmRespStatus, err
+	}
 
 	fcmRespStatus.StatusCode = response.StatusCode
 
 	fcmRespStatus.RetryAfter = response.Header.Get(retry_after_header)
 
-	if response.StatusCode == 200 && err == nil {
-
-		fcmRespStatus.Ok = true
-
-		eror := fcmRespStatus.parseStatusBody(body)
-		if eror != nil {
-			return fcmRespStatus, eror
-		}
-
+	if response.StatusCode != 200 {
 		return fcmRespStatus, nil
-
-	} else {
-		fcmRespStatus.Ok = false
-
-		eror := fcmRespStatus.parseStatusBody(body)
-		if eror != nil {
-			return fcmRespStatus, eror
-		}
-
-		return fcmRespStatus, err
 	}
 
-	return fcmRespStatus, nil
+	err = fcmRespStatus.parseStatusBody(body)
+	if err != nil {
+		return fcmRespStatus, err
+	}
+	fcmRespStatus.Ok = true
 
+	return fcmRespStatus, nil
 }
 
 // Send to fcm
