@@ -218,9 +218,9 @@ func (this *FcmResponseStatus) parseStatusBody(body []byte) error {
 
 }
 
-// SetPriorety Sets the priority of the message.
+// SetPriority Sets the priority of the message.
 // Priority_HIGH or Priority_NORMAL
-func (this *FcmClient) SetPriorety(p string) {
+func (this *FcmClient) SetPriority(p string) {
 
 	if p == Priority_HIGH {
 		this.Message.Priority = Priority_HIGH
