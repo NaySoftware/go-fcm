@@ -63,7 +63,7 @@ is being deprecated for server keys.
 
 ###### Firebase Cloud Messaging token ( new token )
 
-serverKey variable is the server key by Firebase Cloud Messaging
+serverKey variable will also hold the new FCM token by Firebase Cloud Messaging
 
 Firebase Cloud Messaging token can be found in:
 
