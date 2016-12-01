@@ -49,17 +49,27 @@ https://developers.google.com/instance-id/reference/server
 ```
 ### Notes
 
-######
 
 
-> firebase
+
+> a note from firebase console
+
 ```
 Firebase Cloud Messaging tokens have replaced server keys for
 sending messages. While you may continue to use them, support
 is being deprecated for server keys.
 ```
 
+
 ###### Firebase Cloud Messaging token ( new token )
+
+serverKey variable is the server key by Firebase Cloud Messaging
+
+Firebase Cloud Messaging token can be found in:
+
+1. Firebase project settings
+2. Cloud Messaging
+3. then copy the Firebase Cloud Messaging token
 
 
 ###### Server Key
@@ -72,6 +82,7 @@ Server Key can be found in:
 2. Cloud Messaging
 3. then copy the server key
 
+[will be deprecated by firabase as mentioned above!]
 
 ###### Retry mechanism
 
