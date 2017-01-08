@@ -329,7 +329,7 @@ func (this *FcmResponseStatus) PrintResults() {
 // IsTimeout check whether the response timeout based on http response status
 // code and if any error is retryable
 func (this *FcmResponseStatus) IsTimeout() bool {
-	if this.StatusCode > 500 {
+	if this.StatusCode >= 500 {
 		return true
 	} else if this.StatusCode == 200 {
 		for _, val := range this.Results {
