@@ -61,12 +61,12 @@ type FcmMsg struct {
 type FcmResponseStatus struct {
 	Ok            bool
 	StatusCode    int
-	MulticastId   int                 `json:"multicast_id"`
+	MulticastId   int64               `json:"multicast_id"`
 	Success       int                 `json:"success"`
 	Fail          int                 `json:"failure"`
 	Canonical_ids int                 `json:"canonical_ids"`
 	Results       []map[string]string `json:"results,omitempty"`
-	MsgId         int                 `json:"message_id,omitempty"`
+	MsgId         int64               `json:"message_id,omitempty"`
 	Err           string              `json:"error,omitempty"`
 	RetryAfter    string
 }
