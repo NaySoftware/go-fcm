@@ -61,12 +61,12 @@ type FcmMsg struct {
 type FcmResponseStatus struct {
 	Ok            bool
 	StatusCode    int
-	MulticastId   int                 `json:"multicast_id"`
+	MulticastId   int64               `json:"multicast_id"`
 	Success       int                 `json:"success"`
 	Fail          int                 `json:"failure"`
 	Canonical_ids int                 `json:"canonical_ids"`
 	Results       []map[string]string `json:"results,omitempty"`
-	MsgId         int                 `json:"message_id,omitempty"`
+	MsgId         int64               `json:"message_id,omitempty"`
 	Err           string              `json:"error,omitempty"`
 	RetryAfter    string
 }
@@ -220,13 +220,15 @@ func (this *FcmResponseStatus) parseStatusBody(body []byte) error {
 
 // SetPriority Sets the priority of the message.
 // Priority_HIGH or Priority_NORMAL
-func (this *FcmClient) SetPriority(p string) {
+func (this *FcmClient) SetPriority(p string) *FcmClient {
 
 	if p == Priority_HIGH {
 		this.Message.Priority = Priority_HIGH
 	} else {
 		this.Message.Priority = Priority_NORMAL
 	}
+
+	return this
 }
 
 // SetCollapseKey This parameter identifies a group of messages
