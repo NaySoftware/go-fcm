@@ -333,7 +333,9 @@ func (this *FcmResponseStatus) PrintResults() {
 func (this *FcmResponseStatus) IsTimeout() bool {
 	if this.StatusCode >= 500 {
 		return true
-	} else if this.StatusCode == 200 {
+	}
+
+	if this.StatusCode == 200 {
 		for _, val := range this.Results {
 			for k, v := range val {
 				if k == error_key && retreyableErrors[v] == true {
