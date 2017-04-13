@@ -141,7 +141,7 @@ func (this *FcmClient) newDevicesList(list []string) *FcmClient {
 }
 
 func (this *FcmClient) SetClient(client *http.Client) {
-	this.c = *client
+	this.client = *client
 }
 
 // AppendDevices adds more devices/tokens to the Fcm request
