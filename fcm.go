@@ -39,6 +39,7 @@ var (
 type FcmClient struct {
 	ApiKey  string
 	Message FcmMsg
+	client  *http.Client
 }
 
 // FcmMsg represents fcm request message
@@ -73,24 +74,25 @@ type FcmResponseStatus struct {
 
 // NotificationPayload notification message payload
 type NotificationPayload struct {
-	Title        string `json:"title,omitempty"`
-	Body         string `json:"body,omitempty"`
-	Icon         string `json:"icon,omitempty"`
-	Sound        string `json:"sound,omitempty"`
-	Badge        string `json:"badge,omitempty"`
-	Tag          string `json:"tag,omitempty"`
-	Color        string `json:"color,omitempty"`
-	ClickAction  string `json:"click_action,omitempty"`
-	BodyLocKey   string `json:"body_loc_key,omitempty"`
-	BodyLocArgs  string `json:"body_loc_args,omitempty"`
-	TitleLocKey  string `json:"title_loc_key,omitempty"`
-	TitleLocArgs string `json:"title_loc_args,omitempty"`
+	Title        string   `json:"title,omitempty"`
+	Body         string   `json:"body,omitempty"`
+	Icon         string   `json:"icon,omitempty"`
+	Sound        string   `json:"sound,omitempty"`
+	Badge        string   `json:"badge,omitempty"`
+	Tag          string   `json:"tag,omitempty"`
+	Color        string   `json:"color,omitempty"`
+	ClickAction  string   `json:"click_action,omitempty"`
+	BodyLocKey   string   `json:"body_loc_key,omitempty"`
+	BodyLocArgs  []string `json:"body_loc_args,omitempty"`
+	TitleLocKey  string   `json:"title_loc_key,omitempty"`
+	TitleLocArgs []string `json:"title_loc_args,omitempty"`
 }
 
 // NewFcmClient init and create fcm client
 func NewFcmClient(apiKey string) *FcmClient {
 	fcmc := new(FcmClient)
 	fcmc.ApiKey = apiKey
+	fcmc.client = &http.Client{}
 
 	return fcmc
 }
@@ -138,6 +140,10 @@ func (this *FcmClient) newDevicesList(list []string) *FcmClient {
 
 }
 
+func (this *FcmClient) SetClient(client *http.Client) {
+	this.client = client
+}
+
 // AppendDevices adds more devices/tokens to the Fcm request
 func (this *FcmClient) AppendDevices(list []string) *FcmClient {
 
@@ -165,7 +171,7 @@ func (this *FcmClient) sendOnce() (*FcmResponseStatus, error) {
 	request.Header.Set("Authorization", this.apiKeyHeader())
 	request.Header.Set("Content-Type", "application/json")
 
-	client := &http.Client{}
+	client := this.client
 	response, err := client.Do(request)
 
 	if err != nil {
