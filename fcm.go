@@ -39,6 +39,7 @@ var (
 type FcmClient struct {
 	ApiKey  string
 	Message FcmMsg
+	client  http.Client
 }
 
 // FcmMsg represents fcm request message
@@ -91,6 +92,7 @@ type NotificationPayload struct {
 func NewFcmClient(apiKey string) *FcmClient {
 	fcmc := new(FcmClient)
 	fcmc.ApiKey = apiKey
+	fcmc.client = http.Client{}
 
 	return fcmc
 }
@@ -138,6 +140,10 @@ func (this *FcmClient) newDevicesList(list []string) *FcmClient {
 
 }
 
+func (this *FcmClient) SetClient(client *http.Client) {
+	this.c = *client
+}
+
 // AppendDevices adds more devices/tokens to the Fcm request
 func (this *FcmClient) AppendDevices(list []string) *FcmClient {
 
@@ -165,7 +171,7 @@ func (this *FcmClient) sendOnce() (*FcmResponseStatus, error) {
 	request.Header.Set("Authorization", this.apiKeyHeader())
 	request.Header.Set("Content-Type", "application/json")
 
-	client := &http.Client{}
+	client := this.client
 	response, err := client.Do(request)
 
 	if err != nil {
