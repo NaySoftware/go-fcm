@@ -131,6 +131,14 @@ func (this *FcmClient) NewFcmRegIdsMsg(list []string, body interface{}) *FcmClie
 
 }
 
+// New FcmRegIdsNotification gets a list of devices with notification payload
+func (this *FcmClient) NewFcmRegIdsNotification(list []string, payload *NotificationPayload) *FcmClient {
+	this.newDevicesList(list)
+	this.SetNotificationPayload(payload)
+
+	return this
+}
+
 // newDevicesList init the devices list
 func (this *FcmClient) newDevicesList(list []string) *FcmClient {
 	this.Message.RegistrationIds = make([]string, len(list))

@@ -101,21 +101,19 @@ its recommended to use a backoff time to retry the request - (if RetryAfter
 ### Send to A topic
 
 ```go
-
 package main
 
 import (
 	"fmt"
-    "github.com/NaySoftware/go-fcm"
+	"github.com/NaySoftware/go-fcm"
 )
 
 const (
-	 serverKey = "YOUR-KEY"
-     topic = "/topics/someTopic"
+	serverKey = "YOUR-KEY"
+	topic = "/topics/someTopic"
 )
 
 func main() {
-
 	data := map[string]string{
 		"msg": "Hello World1",
 		"sum": "Happy Day",
@@ -124,70 +122,99 @@ func main() {
 	c := fcm.NewFcmClient(serverKey)
 	c.NewFcmMsgTo(topic, data)
 
-
 	status, err := c.Send()
 
-
 	if err == nil {
-    status.PrintResults()
+		status.PrintResults()
 	} else {
 		fmt.Println(err)
 	}
-
 }
-
-
 ```
 
-
-### Send to a list of Devices (tokens)
+### Send data message to a list of Devices (tokens)
 
 ```go
-
 package main
 
 import (
 	"fmt"
-    "github.com/NaySoftware/go-fcm"
+	"github.com/NaySoftware/go-fcm"
 )
 
 const (
-	 serverKey = "YOUR-KEY"
+	serverKey = "YOUR-KEY"
 )
 
 func main() {
-
 	data := map[string]string{
 		"msg": "Hello World1",
 		"sum": "Happy Day",
 	}
 
-  ids := []string{
-      "token1",
-  }
+	ids := []string{
+		"token1",
+	}
 
-
-  xds := []string{
-      "token5",
-      "token6",
-      "token7",
-  }
+	xds := []string{
+		"token5",
+		"token6",
+		"token7",
+	}
 
 	c := fcm.NewFcmClient(serverKey)
-    c.NewFcmRegIdsMsg(ids, data)
-    c.AppendDevices(xds)
+	c.NewFcmRegIdsMsg(ids, data)
+	c.AppendDevices(xds)
 
 	status, err := c.Send()
 
-
 	if err == nil {
-    status.PrintResults()
+		status.PrintResults()
 	} else {
 		fmt.Println(err)
 	}
-
 }
+```
 
+### Send notification message to a list of Devices (tokens)
 
+```go
+package main
 
+import (
+	"fmt"
+	"github.com/NaySoftware/go-fcm"
+)
+
+const (
+	serverKey = "YOUR-KEY"
+)
+
+func main() {
+	notificationPayload := &fcm.NotificationPayload{
+		Body: "Hello World",
+	}
+
+	ids := []string{
+		"token1",
+	}
+
+	xds := []string{
+		"token5",
+		"token6",
+		"token7",
+	}
+
+	c := fcm.NewFcmClient(serverKey)
+	c.NewFcmRegIdsNotification(ids, notificationPayload)
+	c.AppendDevices(xds)
+
+	status, err := c.Send()
+
+	if err == nil {
+		status.PrintResults()
+	} else {
+		fmt.Println(err)
+	}
+}
 ```
