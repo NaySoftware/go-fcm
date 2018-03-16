@@ -43,19 +43,19 @@ type FcmClient struct {
 
 // FcmMsg represents fcm request message
 type FcmMsg struct {
-	Data                  interface{}         `json:"data,omitempty"`
-	To                    string              `json:"to,omitempty"`
-	RegistrationIds       []string            `json:"registration_ids,omitempty"`
-	CollapseKey           string              `json:"collapse_key,omitempty"`
-	Priority              string              `json:"priority,omitempty"`
-	Notification          NotificationPayload `json:"notification,omitempty"`
-	ContentAvailable      bool                `json:"content_available,omitempty"`
-	DelayWhileIdle        bool                `json:"delay_while_idle,omitempty"`
-	TimeToLive            int                 `json:"time_to_live,omitempty"`
-	RestrictedPackageName string              `json:"restricted_package_name,omitempty"`
-	DryRun                bool                `json:"dry_run,omitempty"`
-	Condition             string              `json:"condition,omitempty"`
-	MutableContent        bool                `json:"mutable_content,omitempty"`
+	Data                  interface{}          `json:"data,omitempty"`
+	To                    string               `json:"to,omitempty"`
+	RegistrationIds       []string             `json:"registration_ids,omitempty"`
+	CollapseKey           string               `json:"collapse_key,omitempty"`
+	Priority              string               `json:"priority,omitempty"`
+	Notification          *NotificationPayload `json:"notification,omitempty"`
+	ContentAvailable      bool                 `json:"content_available,omitempty"`
+	DelayWhileIdle        bool                 `json:"delay_while_idle,omitempty"`
+	TimeToLive            int                  `json:"time_to_live,omitempty"`
+	RestrictedPackageName string               `json:"restricted_package_name,omitempty"`
+	DryRun                bool                 `json:"dry_run,omitempty"`
+	Condition             string               `json:"condition,omitempty"`
+	MutableContent        bool                 `json:"mutable_content,omitempty"`
 }
 
 // FcmMsg represents fcm response message - (tokens and topics)
@@ -249,7 +249,7 @@ func (this *FcmClient) SetCollapseKey(val string) *FcmClient {
 // https://firebase.google.com/docs/cloud-messaging/http-server-ref
 func (this *FcmClient) SetNotificationPayload(payload *NotificationPayload) *FcmClient {
 
-	this.Message.Notification = *payload
+	this.Message.Notification = payload
 
 	return this
 }
