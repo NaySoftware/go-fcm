@@ -153,15 +153,8 @@ func (this *FcmClient) apiKeyHeader() string {
 	return fmt.Sprintf("key=%v", this.ApiKey)
 }
 
-// sendOnce send a single request to fcm
-func (this *FcmClient) sendOnce() (*FcmResponseStatus, error) {
-
+func (this *FcmClient) sendToFcm(jsonByte []byte)  (*FcmResponseStatus, error) {
 	fcmRespStatus := new(FcmResponseStatus)
-
-	jsonByte, err := this.Message.toJsonByte()
-	if err != nil {
-		return fcmRespStatus, err
-	}
 
 	request, err := http.NewRequest("POST", fcmServerUrl, bytes.NewBuffer(jsonByte))
 	request.Header.Set("Authorization", this.apiKeyHeader())
@@ -197,10 +190,34 @@ func (this *FcmClient) sendOnce() (*FcmResponseStatus, error) {
 	return fcmRespStatus, nil
 }
 
+// sendOnce send a single request to fcm
+func (this *FcmClient) sendOnce() (*FcmResponseStatus, error) {
+
+	fcmRespStatus := new(FcmResponseStatus)
+
+	jsonByte, err := this.Message.toJsonByte()
+	if err != nil {
+		return fcmRespStatus, err
+	}
+
+	return this.sendToFcm(jsonByte)
+}
+
 // Send to fcm
 func (this *FcmClient) Send() (*FcmResponseStatus, error) {
 	return this.sendOnce()
 
+}
+
+func (this *FcmClient) SendWithPayload(fcmMsg *FcmMsg) (*FcmResponseStatus, error){
+	fcmRespStatus := new(FcmResponseStatus)
+	
+	jsonByte, err := fcmMsg.toJsonByte()
+	if err != nil {
+		return fcmRespStatus, err
+	}
+
+	return this.sendToFcm(jsonByte)
 }
 
 // toJsonByte converts FcmMsg to a json byte
