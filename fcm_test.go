@@ -1,6 +1,7 @@
 package fcm
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -157,6 +158,42 @@ func TestRegIdHandle_2(t *testing.T) {
 	if res.Success != 2 || res.Fail != 1 {
 		t.Error("Parsing Success or Fail error")
 	}
+}
+
+func TestSendWithContext(t *testing.T) {
+
+	srv := httptest.NewServer(http.HandlerFunc(regIdHandle))
+	chgUrl(srv)
+	defer srv.Close()
+
+	c := NewFcmClient("key")
+
+	data := map[string]string{
+		"msg": "Hello World",
+		"sum": "Happy Day",
+	}
+
+	c.NewFcmMsgTo("/topics/topicName", data)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	res, err := c.SendWithContext(ctx)
+	if err != nil {
+		t.Error("Response Error : ", err)
+	}
+	if res == nil {
+		t.Error("Res is nil")
+	}
+
+	// After the cancellation the request is expected to fail.
+	cancel()
+
+	_, err = c.SendWithContext(ctx)
+	if err == nil {
+		t.Errorf("expected context error, got %v", err)
+	}
+
 }
 
 func chgUrl(ts *httptest.Server) {
