@@ -7,20 +7,13 @@ Firebase Cloud Messaging ( FCM ) Library using golang ( Go )
 
 This library uses HTTP/JSON Firebase Cloud Messaging connection server protocol
 
-
 ###### Features
 
-* Send messages to a topic
-* Send messages to a device list
-* Message can be a notification or data payload
-* Supports condition attribute (fcm only)
-* Instace Id Features
-	- Get info about app Instance
-	- Subscribe app Instance to a topic
-	- Batch Subscribe/Unsubscribe to/from a topic
-	- Create registration tokens for APNs tokens
-
-
+- Send messages to a topic
+- Send messages to a device list
+- Message can be a notification or data payload
+- Supports condition attribute (fcm only)
+- Instace Id Features - Get info about app Instance - Subscribe app Instance to a topic - Batch Subscribe/Unsubscribe to/from a topic - Create registration tokens for APNs tokens
 
 ## Usage
 
@@ -29,28 +22,30 @@ go get github.com/NaySoftware/go-fcm
 ```
 
 ## Docs - go-fcm API
+
 ```
 https://godoc.org/github.com/NaySoftware/go-fcm
 ```
 
-####  Firebase Cloud Messaging HTTP Protocol Specs
+#### Firebase Cloud Messaging HTTP Protocol Specs
+
 ```
 https://firebase.google.com/docs/cloud-messaging/http-server-ref
 ```
 
 #### Firebase Cloud Messaging Developer docs
+
 ```
 https://firebase.google.com/docs/cloud-messaging/
 ```
 
 #### (Google) Instance Id Server Reference
+
 ```
 https://developers.google.com/instance-id/reference/server
 ```
+
 ### Notes
-
-
-
 
 > a note from firebase console
 
@@ -59,7 +54,6 @@ Firebase Cloud Messaging tokens have replaced server keys for
 sending messages. While you may continue to use them, support
 is being deprecated for server keys.
 ```
-
 
 ###### Firebase Cloud Messaging token ( new token )
 
@@ -70,7 +64,6 @@ Firebase Cloud Messaging token can be found in:
 1. Firebase project settings
 2. Cloud Messaging
 3. then copy the Firebase Cloud Messaging token
-
 
 ###### Server Key
 
@@ -91,10 +84,7 @@ Sending a request will result with a "FcmResponseStatus" struct, which holds
 a detailed information based on the Firebase Response, with RetryAfter
 (response header) if available - with a failed request.
 its recommended to use a backoff time to retry the request - (if RetryAfter
-	header is not available).
-
-
-
+header is not available).
 
 # Examples
 
@@ -138,7 +128,6 @@ func main() {
 
 
 ```
-
 
 ### Send to a list of Devices (tokens)
 
@@ -189,5 +178,44 @@ func main() {
 }
 
 
+
+```
+
+```go
+package main
+
+import (
+	"fmt"
+
+	"github.com/NaySoftware/go-fcm"
+)
+
+const (
+	serverKey = "Your Key"
+)
+
+func main() {
+
+	data := map[string]string{
+		"status": "Hello World",
+	}
+
+	ids := []string{
+	 "token1",
+	}
+
+	c := fcm.NewFcmClient(serverKey)
+
+	c.NewFcmRegIdsMsg(ids, data, fcm.NotificationPayload{Title: "Title", Body: "Hi")
+
+	status, err := c.Send()
+
+	if err == nil {
+		status.PrintResults()
+	} else {
+		fmt.Println(err)
+	}
+
+}
 
 ```

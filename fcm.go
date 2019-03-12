@@ -122,11 +122,10 @@ func (this *FcmClient) SetMsgData(body interface{}) *FcmClient {
 
 }
 
-// NewFcmRegIdsMsg gets a list of devices with data payload
-func (this *FcmClient) NewFcmRegIdsMsg(list []string, body interface{}) *FcmClient {
+func (this *FcmClient) NewFcmRegIdsMsg(list []string, body interface{}, notification NotificationPayload) *FcmClient {
 	this.newDevicesList(list)
 	this.Message.Data = body
-
+	this.Message.Notification = notification
 	return this
 
 }
