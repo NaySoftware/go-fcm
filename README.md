@@ -1,7 +1,6 @@
 # go-fcm : FCM Library for Go
 
-[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg?style=flat-square)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=MYW4MY786JXFN&lc=GB&item_name=go%2dfcm%20development&item_number=go%2dfcm&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donate_SM%2egif%3aNonHosted)
-[![AUR](https://img.shields.io/aur/license/yaourt.svg?style=flat-square)](https://github.com/NaySoftware/go-fcm/blob/master/LICENSE)
+
 
 Firebase Cloud Messaging ( FCM ) Library using golang ( Go )
 
