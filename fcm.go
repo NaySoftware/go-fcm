@@ -77,6 +77,7 @@ type NotificationPayload struct {
 	Title            string `json:"title,omitempty"`
 	Body             string `json:"body,omitempty"`
 	Icon             string `json:"icon,omitempty"`
+	Image            string `json:"image,omitempty"`
 	Sound            string `json:"sound,omitempty"`
 	Badge            string `json:"badge,omitempty"`
 	Tag              string `json:"tag,omitempty"`
