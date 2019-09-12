@@ -100,17 +100,16 @@ its recommended to use a backoff time to retry the request - (if RetryAfter
 ### Send to A topic
 
 ```go
-
 package main
 
 import (
 	"fmt"
-    "github.com/NaySoftware/go-fcm"
+	"github.com/NaySoftware/go-fcm"
 )
 
 const (
-	 serverKey = "YOUR-KEY"
-     topic = "/topics/someTopic"
+	serverKey = "YOUR-KEY"
+	topic     = "/topics/someTopic"
 )
 
 func main() {
@@ -123,35 +122,30 @@ func main() {
 	c := fcm.NewFcmClient(serverKey)
 	c.NewFcmMsgTo(topic, data)
 
-
 	status, err := c.Send()
 
-
 	if err == nil {
-    status.PrintResults()
+		status.PrintResults()
 	} else {
 		fmt.Println(err)
 	}
 
 }
-
-
 ```
 
 
 ### Send to a list of Devices (tokens)
 
 ```go
-
 package main
 
 import (
 	"fmt"
-    "github.com/NaySoftware/go-fcm"
+	"github.com/NaySoftware/go-fcm"
 )
 
 const (
-	 serverKey = "YOUR-KEY"
+	serverKey = "YOUR-KEY"
 )
 
 func main() {
@@ -161,32 +155,27 @@ func main() {
 		"sum": "Happy Day",
 	}
 
-  ids := []string{
-      "token1",
-  }
+	ids := []string{
+		"token1",
+	}
 
-
-  xds := []string{
-      "token5",
-      "token6",
-      "token7",
-  }
+	xds := []string{
+		"token5",
+		"token6",
+		"token7",
+	}
 
 	c := fcm.NewFcmClient(serverKey)
-    c.NewFcmRegIdsMsg(ids, data)
-    c.AppendDevices(xds)
+	c.NewFcmRegIdsMsg(ids, data)
+	c.AppendDevices(xds)
 
 	status, err := c.Send()
 
-
 	if err == nil {
-    status.PrintResults()
+		status.PrintResults()
 	} else {
 		fmt.Println(err)
 	}
 
 }
-
-
-
 ```
