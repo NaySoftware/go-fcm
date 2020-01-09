@@ -98,7 +98,7 @@ func NewFcmClient(apiKey string) *FcmClient {
 }
 
 // NewFcmTopicMsg sets the targeted token/topic and the data payload
-func (this *FcmClient) NewFcmTopicMsg(to string, body map[string]string) *FcmClient {
+func (this *FcmClient) NewFcmTopicMsg(to string, body map[string]interface{}) *FcmClient {
 
 	this.NewFcmMsgTo(to, body)
 
