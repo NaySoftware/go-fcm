@@ -2,6 +2,7 @@ package fcm
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -153,12 +154,16 @@ func (this *FcmClient) apiKeyHeader() string {
 	return fmt.Sprintf("key=%v", this.ApiKey)
 }
 
-func (this *FcmClient) sendToFcm(jsonByte []byte)  (*FcmResponseStatus, error) {
+func (this *FcmClient) sendToFcm(ctx context.Context, jsonByte []byte) (*FcmResponseStatus, error) {
 	fcmRespStatus := new(FcmResponseStatus)
 
 	request, err := http.NewRequest("POST", fcmServerUrl, bytes.NewBuffer(jsonByte))
 	request.Header.Set("Authorization", this.apiKeyHeader())
 	request.Header.Set("Content-Type", "application/json")
+
+	if ctx != nil {
+		request = request.WithContext(ctx)
+	}
 
 	client := &http.Client{}
 	response, err := client.Do(request)
@@ -200,7 +205,7 @@ func (this *FcmClient) sendOnce() (*FcmResponseStatus, error) {
 		return fcmRespStatus, err
 	}
 
-	return this.sendToFcm(jsonByte)
+	return this.sendToFcm(nil, jsonByte)
 }
 
 // Send to fcm
@@ -209,15 +214,19 @@ func (this *FcmClient) Send() (*FcmResponseStatus, error) {
 
 }
 
-func (this *FcmClient) SendWithPayload(fcmMsg *FcmMsg) (*FcmResponseStatus, error){
+func (this *FcmClient) SendWithPayload(fcmMsg *FcmMsg) (*FcmResponseStatus, error) {
+	return this.SendWithPayloadCtx(nil, fcmMsg)
+}
+
+func (this *FcmClient) SendWithPayloadCtx(ctx context.Context, fcmMsg *FcmMsg) (*FcmResponseStatus, error) {
 	fcmRespStatus := new(FcmResponseStatus)
-	
+
 	jsonByte, err := fcmMsg.toJsonByte()
 	if err != nil {
 		return fcmRespStatus, err
 	}
 
-	return this.sendToFcm(jsonByte)
+	return this.sendToFcm(ctx, jsonByte)
 }
 
 // toJsonByte converts FcmMsg to a json byte
