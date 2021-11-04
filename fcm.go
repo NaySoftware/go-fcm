@@ -57,6 +57,7 @@ type FcmMsg struct {
 	DryRun                bool                `json:"dry_run,omitempty"`
 	Condition             string              `json:"condition,omitempty"`
 	MutableContent        bool                `json:"mutable_content,omitempty"`
+    FcmOptions            AndroidFcmOptions   `json:"fcm_options,omitempty"`
 }
 
 // FcmMsg represents fcm response message - (tokens and topics)
@@ -88,6 +89,11 @@ type NotificationPayload struct {
 	TitleLocKey      string `json:"title_loc_key,omitempty"`
 	TitleLocArgs     string `json:"title_loc_args,omitempty"`
 	AndroidChannelID string `json:"android_channel_id,omitempty"`
+}
+
+// AndroidFcmOptions Options for features provided by the FCM SDK for Android
+type AndroidFcmOptions struct {
+    AnalyticsLabel string `json:"analytics_label,omitempty"`
 }
 
 // NewFcmClient init and create fcm client
@@ -381,4 +387,10 @@ func (this *FcmResponseStatus) GetRetryAfterTime() (t time.Duration, e error) {
 func (this *FcmClient) SetCondition(condition string) *FcmClient {
 	this.Message.Condition = condition
 	return this
+}
+
+// SetAnalyticsLabel Label associated with the message's analytics data
+func (this *FcmClient) SetAnalyticsLabel(label string) *FcmClient {
+    this.Message.FcmOptions.AnalyticsLabel = label
+    return this
 }
