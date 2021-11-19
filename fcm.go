@@ -38,8 +38,9 @@ var (
 
 // FcmClient stores the key and the Message (FcmMsg)
 type FcmClient struct {
-	ApiKey  string
-	Message FcmMsg
+	ApiKey     string
+	Message    FcmMsg
+	HttpClient *http.Client
 }
 
 // FcmMsg represents fcm request message
@@ -94,7 +95,35 @@ type NotificationPayload struct {
 func NewFcmClient(apiKey string) *FcmClient {
 	fcmc := new(FcmClient)
 	fcmc.ApiKey = apiKey
+	fcmc.HttpClient = nil
+	return fcmc
+}
 
+// NewFcmClient init and create fcm client
+func NewFcmClientWithTransport(apiKey string, transport *http.Transport, timeout *time.Duration) *FcmClient {
+	httpTimeout := time.Second * 10 // default timeout
+	if timeout != nil {
+		httpTimeout = *timeout
+	}
+
+	httpTransport := &http.Transport{ // default http transport
+		MaxIdleConns:        100,
+		IdleConnTimeout:     60 * time.Second,
+		MaxConnsPerHost:     100, // this value make sure have the same count from pool count
+		MaxIdleConnsPerHost: 100,
+		TLSHandshakeTimeout: 5 * time.Second,
+	}
+
+	if transport != nil {
+		httpTransport = transport
+	}
+
+	fcmc := new(FcmClient)
+	fcmc.ApiKey = apiKey
+	fcmc.HttpClient = &http.Client{
+		Timeout:   httpTimeout,
+		Transport: httpTransport,
+	}
 	return fcmc
 }
 
@@ -165,7 +194,11 @@ func (this *FcmClient) sendToFcm(ctx context.Context, jsonByte []byte) (*FcmResp
 		request = request.WithContext(ctx)
 	}
 
-	client := &http.Client{}
+	client := this.HttpClient
+	if client == nil {
+		client = &http.Client{}
+	}
+
 	response, err := client.Do(request)
 
 	if err != nil {

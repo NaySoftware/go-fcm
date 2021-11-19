@@ -186,13 +186,15 @@ func TestFcmClient_SendWithPayloadCtx(t *testing.T) {
 		fcmMsg *FcmMsg
 	}
 	tests := []struct {
-		name    string
-		fields  fields
-		args    args
-		wantErr bool
+		name         string
+		useTransport bool
+		fields       fields
+		args         args
+		wantErr      bool
 	}{
 		{
-			name: "non nil context",
+			name:         "non nil context",
+			useTransport: false,
 			fields: fields{
 				ApiKey: "key",
 			},
@@ -209,7 +211,44 @@ func TestFcmClient_SendWithPayloadCtx(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "nil context",
+			name:         "nil context",
+			useTransport: false,
+			fields: fields{
+				ApiKey: "key",
+			},
+			args: args{
+				ctx: nil,
+				fcmMsg: &FcmMsg{
+					Data: map[string]string{
+						"msg": "Hello World",
+						"sum": "Happy Day",
+					},
+					RegistrationIds: []string{"abc123"},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name:         "non nil context with transport",
+			useTransport: true,
+			fields: fields{
+				ApiKey: "key",
+			},
+			args: args{
+				ctx: context.Background(),
+				fcmMsg: &FcmMsg{
+					Data: map[string]string{
+						"msg": "Hello World",
+						"sum": "Happy Day",
+					},
+					RegistrationIds: []string{"abc123"},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name:         "nil context whout transport",
+			useTransport: true,
 			fields: fields{
 				ApiKey: "key",
 			},
@@ -230,9 +269,21 @@ func TestFcmClient_SendWithPayloadCtx(t *testing.T) {
 		srv := httptest.NewServer(http.HandlerFunc(regIdHandle))
 		chgUrl(srv)
 		t.Run(tt.name, func(t *testing.T) {
-			this := &FcmClient{
-				ApiKey:  tt.fields.ApiKey,
-				Message: tt.fields.Message,
+			this := &FcmClient{}
+			if !tt.useTransport {
+				this = NewFcmClient(tt.fields.ApiKey)
+				this.SetMsgData(tt.fields.Message)
+				if this.HttpClient != nil {
+					t.Errorf("FcmClient.HttpClient should be nil")
+					return
+				}
+			} else {
+				this = NewFcmClientWithTransport(tt.fields.ApiKey, nil, nil)
+				this.SetMsgData(tt.fields.Message)
+				if this.HttpClient == nil {
+					t.Errorf("FcmClient.HttpClient should be not nil")
+					return
+				}
 			}
 			_, err := this.SendWithPayloadCtx(tt.args.ctx, tt.args.fcmMsg)
 			if (err != nil) != tt.wantErr {
