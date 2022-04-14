@@ -11,10 +11,10 @@ import (
 func TestTopicHandle_1(t *testing.T) {
 
 	srv := httptest.NewServer(http.HandlerFunc(topicHandle))
-	chgUrl(srv)
 	defer srv.Close()
 
 	c := NewFcmClient("key")
+	c.FCMServerURL = srv.URL
 
 	data := map[string]string{
 		"msg": "Hello World",
@@ -35,10 +35,10 @@ func TestTopicHandle_1(t *testing.T) {
 func TestTopicHandle_2(t *testing.T) {
 
 	srv := httptest.NewServer(http.HandlerFunc(topicHandle))
-	chgUrl(srv)
 	defer srv.Close()
 
 	c := NewFcmClient("key")
+	c.FCMServerURL = srv.URL
 
 	data := map[string]string{
 		"msg": "Hello World",
@@ -59,10 +59,10 @@ func TestTopicHandle_2(t *testing.T) {
 func TestTopicHandle_3(t *testing.T) {
 
 	srv := httptest.NewServer(http.HandlerFunc(topicHandle))
-	chgUrl(srv)
 	defer srv.Close()
 
 	c := NewFcmClient("key")
+	c.FCMServerURL = srv.URL
 
 	data := map[string]string{
 		"msg": "Hello World",
@@ -88,10 +88,10 @@ func TestTopicHandle_3(t *testing.T) {
 func TestRegIdHandle_1(t *testing.T) {
 
 	srv := httptest.NewServer(http.HandlerFunc(regIdHandle))
-	chgUrl(srv)
 	defer srv.Close()
 
 	c := NewFcmClient("key")
+	c.FCMServerURL = srv.URL
 
 	data := map[string]string{
 		"msg": "Hello World",
@@ -122,10 +122,10 @@ func TestRegIdHandle_1(t *testing.T) {
 func TestRegIdHandle_2(t *testing.T) {
 
 	srv := httptest.NewServer(http.HandlerFunc(regIdHandle))
-	chgUrl(srv)
 	defer srv.Close()
 
 	c := NewFcmClient("key")
+	c.FCMServerURL = srv.URL
 
 	data := map[string]string{
 		"msg": "Hello World",
@@ -163,10 +163,10 @@ func TestRegIdHandle_2(t *testing.T) {
 func TestSendWithContext(t *testing.T) {
 
 	srv := httptest.NewServer(http.HandlerFunc(regIdHandle))
-	chgUrl(srv)
 	defer srv.Close()
 
 	c := NewFcmClient("key")
+	c.FCMServerURL = srv.URL
 
 	data := map[string]string{
 		"msg": "Hello World",
@@ -196,18 +196,12 @@ func TestSendWithContext(t *testing.T) {
 
 }
 
-func chgUrl(ts *httptest.Server) {
-	fcmServerUrl = ts.URL
-}
-
 func topicHandle(w http.ResponseWriter, r *http.Request) {
 	result := `{"message_id":6985435902064854329}`
-
 	fmt.Fprintln(w, result)
 }
 
 func regIdHandle(w http.ResponseWriter, r *http.Request) {
 	result := `{"multicast_id":1003859738309903334,"success":2,"failure":1,"canonical_ids":0,"results":[{"message_id":"0:1448128667408487%ecaaa23db3fd7efd"},{"message_id":"0:1468135657607438%ecafacddf9ff8ead"},{"error":"InvalidRegistration"}]}`
 	fmt.Fprintln(w, result)
-
 }

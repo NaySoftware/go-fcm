@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"time"
 )
 
@@ -31,15 +32,13 @@ var (
 		"Unavailable":         true,
 		"InternalServerError": true,
 	}
-
-	// fcmServerUrl for testing purposes
-	fcmServerUrl = fcm_server_url
 )
 
 // FcmClient stores the key and the Message (FcmMsg)
 type FcmClient struct {
-	ApiKey  string
-	Message FcmMsg
+	ApiKey       string
+	Message      FcmMsg
+	FCMServerURL string
 }
 
 // FcmMsg represents fcm request message
@@ -57,7 +56,7 @@ type FcmMsg struct {
 	DryRun                bool                `json:"dry_run,omitempty"`
 	Condition             string              `json:"condition,omitempty"`
 	MutableContent        bool                `json:"mutable_content,omitempty"`
-    FcmOptions            AndroidFcmOptions   `json:"fcm_options,omitempty"`
+	FcmOptions            AndroidFcmOptions   `json:"fcm_options,omitempty"`
 }
 
 // FcmMsg represents fcm response message - (tokens and topics)
@@ -93,14 +92,17 @@ type NotificationPayload struct {
 
 // AndroidFcmOptions Options for features provided by the FCM SDK for Android
 type AndroidFcmOptions struct {
-    AnalyticsLabel string `json:"analytics_label,omitempty"`
+	AnalyticsLabel string `json:"analytics_label,omitempty"`
 }
 
 // NewFcmClient init and create fcm client
 func NewFcmClient(apiKey string) *FcmClient {
 	fcmc := new(FcmClient)
 	fcmc.ApiKey = apiKey
-
+	fcmc.FCMServerURL = fcm_server_url
+	if os.Getenv("FCM_SERVER_URL") != "" {
+		fcmc.FCMServerURL = os.Getenv("FCM_SERVER_URL")
+	}
 	return fcmc
 }
 
@@ -169,7 +171,7 @@ func (this *FcmClient) sendOnce(ctx context.Context) (*FcmResponseStatus, error)
 		return fcmRespStatus, err
 	}
 
-	request, err := http.NewRequest("POST", fcmServerUrl, bytes.NewBuffer(jsonByte))
+	request, err := http.NewRequest("POST", this.FCMServerURL, bytes.NewBuffer(jsonByte))
 	request.Header.Set("Authorization", this.apiKeyHeader())
 	request.Header.Set("Content-Type", "application/json")
 
@@ -391,6 +393,6 @@ func (this *FcmClient) SetCondition(condition string) *FcmClient {
 
 // SetAnalyticsLabel Label associated with the message's analytics data
 func (this *FcmClient) SetAnalyticsLabel(label string) *FcmClient {
-    this.Message.FcmOptions.AnalyticsLabel = label
-    return this
+	this.Message.FcmOptions.AnalyticsLabel = label
+	return this
 }
