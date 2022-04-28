@@ -31,6 +31,30 @@ func TestTopicHandle_1(t *testing.T) {
 	}
 }
 
+func TestImage(t *testing.T) {
+
+	srv := httptest.NewServer(http.HandlerFunc(topicHandle))
+	chgUrl(srv)
+	defer srv.Close()
+
+	c := NewFcmClient("key")
+
+	notificationPayload := NotificationPayload{
+		Title: "title - foo",
+		Body:  "body - bar",
+		Image: "https://example.com/img.jpg",
+	}
+	c.SetNotificationPayload(&notificationPayload)
+
+	res, err := c.Send()
+	if err != nil {
+		t.Error("Response Error : ", err)
+	}
+	if res == nil {
+		t.Error("Res is nil")
+	}
+}
+
 func TestTopicHandle_2(t *testing.T) {
 
 	srv := httptest.NewServer(http.HandlerFunc(topicHandle))
