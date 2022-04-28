@@ -123,12 +123,22 @@ func main() {
 	c := fcm.NewFcmClient(serverKey)
 	c.NewFcmMsgTo(topic, data)
 
+	notificationPayload := NotificationPayload{
+		Title: "title - foo",
+		Body:  "body - bar",
+
+		// Set notification image.
+		Image: "https://example.com/img.jpg",
+	}
+
+	c.SetNotificationPayload(&notificationPayload)
+
 
 	status, err := c.Send()
 
 
 	if err == nil {
-    status.PrintResults()
+		status.PrintResults()
 	} else {
 		fmt.Println(err)
 	}
