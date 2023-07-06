@@ -205,3 +205,75 @@ func regIdHandle(w http.ResponseWriter, r *http.Request) {
 	result := `{"multicast_id":1003859738309903334,"success":2,"failure":1,"canonical_ids":0,"results":[{"message_id":"0:1448128667408487%ecaaa23db3fd7efd"},{"message_id":"0:1468135657607438%ecafacddf9ff8ead"},{"error":"InvalidRegistration"}]}`
 	fmt.Fprintln(w, result)
 }
+
+func TestSendDirectBoot(t *testing.T) {
+
+	srv := httptest.NewServer(http.HandlerFunc(topicHandle))
+	defer srv.Close()
+
+	c := NewFcmClient("key")
+	c.FCMServerURL = srv.URL
+
+	data := map[string]string{
+		"msg": "Hello World",
+		"sum": "Happy Day",
+	}
+
+	data2 := map[string]string{
+		"msg": "Hello bits",
+	}
+
+	ids := []string{
+		"token0",
+		"token1",
+		"token2",
+	}
+
+	c.NewFcmTopicMsg("/topics/topicName", data)
+	res, err := c.Send()
+	if err != nil {
+		t.Error("Response Error : ", err)
+	}
+	if res == nil {
+		t.Error("Res is nil")
+	}
+	if c.Message.DirectBootOk != true {
+		t.Error("Failed to set DirectBootOk to true")
+	}
+
+	c.SetMsgData(data2)
+	res, err = c.Send()
+	if c.Message.DirectBootOk != true {
+		t.Error("Failed to set DirectBootOk to true")
+	}
+
+	c.NewFcmRegIdsMsg(ids, data)
+	res, err = c.Send()
+	if c.Message.DirectBootOk != true {
+		t.Error("Failed to set DirectBootOk to true")
+	}
+
+	c.NewFcmTopicMsg("/topics/topicName", data)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	res, err = c.SendWithContext(ctx)
+	if c.Message.DirectBootOk != true {
+		t.Error("Failed to set DirectBootOk to true")
+	}
+
+	c.SetMsgData(data2)
+	ctx, cancel = context.WithCancel(context.Background())
+	defer cancel()
+	res, err = c.SendWithContext(ctx)
+	if c.Message.DirectBootOk != true {
+		t.Error("Failed to set DirectBootOk to true")
+	}
+
+	c.NewFcmRegIdsMsg(ids, data)
+	ctx, cancel = context.WithCancel(context.Background())
+	defer cancel()
+	res, err = c.SendWithContext(ctx)
+	if c.Message.DirectBootOk != true {
+		t.Error("Failed to set DirectBootOk to true")
+	}
+}
