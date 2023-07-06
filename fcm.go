@@ -57,7 +57,7 @@ type FcmMsg struct {
 	Condition             string              `json:"condition,omitempty"`
 	MutableContent        bool                `json:"mutable_content,omitempty"`
 	FcmOptions            AndroidFcmOptions   `json:"fcm_options,omitempty"`
-	Android               AndroidConfig       `json:"android,omitempty"`
+	DirectBootOk          bool                `json:"direct_boot_ok"`
 }
 
 // FcmMsg represents fcm response message - (tokens and topics)
@@ -94,11 +94,6 @@ type NotificationPayload struct {
 // AndroidFcmOptions Options for features provided by the FCM SDK for Android
 type AndroidFcmOptions struct {
 	AnalyticsLabel string `json:"analytics_label,omitempty"`
-}
-
-// AndroidConfig Android specific options for messages
-type AndroidConfig struct {
-	DirectBootOk bool `json:"direct_boot_ok,omitempty"`
 }
 
 // NewFcmClient init and create fcm client
@@ -172,6 +167,7 @@ func (this *FcmClient) apiKeyHeader() string {
 func (this *FcmClient) sendOnce(ctx context.Context) (*FcmResponseStatus, error) {
 	fcmRespStatus := new(FcmResponseStatus)
 
+	this.Message.DirectBootOk = true
 	jsonByte, err := this.Message.toJsonByte()
 	if err != nil {
 		return fcmRespStatus, err
@@ -400,11 +396,5 @@ func (this *FcmClient) SetCondition(condition string) *FcmClient {
 // SetAnalyticsLabel Label associated with the message's analytics data
 func (this *FcmClient) SetAnalyticsLabel(label string) *FcmClient {
 	this.Message.FcmOptions.AnalyticsLabel = label
-	return this
-}
-
-// SetDirectBootOk set the direct boot to true
-func (this *FcmClient) SetDirectBootOk() *FcmClient {
-	this.Message.Android.DirectBootOk = true
 	return this
 }
