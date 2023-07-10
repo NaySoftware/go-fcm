@@ -206,6 +206,30 @@ func regIdHandle(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, result)
 }
 
+func testSend(t *testing.T, c *FcmClient) {
+	res, err := c.Send()
+	checkErrors(t, c, res, err)
+}
+
+func testSendContext(t *testing.T, c *FcmClient) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	res, err := c.SendWithContext(ctx)
+	checkErrors(t, c, res, err)
+}
+
+func checkErrors(t *testing.T, c *FcmClient, res *FcmResponseStatus, err error) {
+	if err != nil {
+		t.Error("Response Error : ", err)
+	}
+	if res == nil {
+		t.Error("Res is nil")
+	}
+	if c.Message.DirectBootOk != true {
+		t.Error("Failed to set DirectBootOk to true")
+	}
+}
+
 func TestSendDirectBoot(t *testing.T) {
 
 	srv := httptest.NewServer(http.HandlerFunc(topicHandle))
@@ -230,50 +254,20 @@ func TestSendDirectBoot(t *testing.T) {
 	}
 
 	c.NewFcmTopicMsg("/topics/topicName", data)
-	res, err := c.Send()
-	if err != nil {
-		t.Error("Response Error : ", err)
-	}
-	if res == nil {
-		t.Error("Res is nil")
-	}
-	if c.Message.DirectBootOk != true {
-		t.Error("Failed to set DirectBootOk to true")
-	}
+	testSend(t, c)
 
 	c.SetMsgData(data2)
-	res, err = c.Send()
-	if c.Message.DirectBootOk != true {
-		t.Error("Failed to set DirectBootOk to true")
-	}
+	testSend(t, c)
 
 	c.NewFcmRegIdsMsg(ids, data)
-	res, err = c.Send()
-	if c.Message.DirectBootOk != true {
-		t.Error("Failed to set DirectBootOk to true")
-	}
+	testSend(t, c)
 
 	c.NewFcmTopicMsg("/topics/topicName", data)
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-	res, err = c.SendWithContext(ctx)
-	if c.Message.DirectBootOk != true {
-		t.Error("Failed to set DirectBootOk to true")
-	}
+	testSendContext(t, c)
 
 	c.SetMsgData(data2)
-	ctx, cancel = context.WithCancel(context.Background())
-	defer cancel()
-	res, err = c.SendWithContext(ctx)
-	if c.Message.DirectBootOk != true {
-		t.Error("Failed to set DirectBootOk to true")
-	}
+	testSendContext(t, c)
 
 	c.NewFcmRegIdsMsg(ids, data)
-	ctx, cancel = context.WithCancel(context.Background())
-	defer cancel()
-	res, err = c.SendWithContext(ctx)
-	if c.Message.DirectBootOk != true {
-		t.Error("Failed to set DirectBootOk to true")
-	}
+	testSendContext(t, c)
 }
